@@ -7,21 +7,15 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "publisher")
-@EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, allowGetters = true)
 public class Publisher implements Serializable {
 
 	@Id
@@ -45,9 +39,9 @@ public class Publisher implements Serializable {
 		// no-arg constructor
 	}
 
-	public Publisher(String firstName, String lasstName, String email) {
+	public Publisher(String firstName, String lastName, String email) {
 		this.firstName = firstName;
-		this.lastName = lasstName;
+		this.lastName = lastName;
 		this.email = email;
 	}
 
@@ -66,8 +60,8 @@ public class Publisher implements Serializable {
 		return lastName;
 	}
 
-	public void setLastName(String lasstName) {
-		this.lastName = lasstName;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getEmail() {

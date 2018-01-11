@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,14 +14,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "author")
-@EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, allowGetters = true)
 public class Author {
 	
 	@Id
@@ -33,7 +29,7 @@ public class Author {
 	private String firstName;
 	
 	@Column(name="last_name")
-	private String lasstName;
+	private String lastName;
 
 	@Column(name="email")
 	private String email;
@@ -42,6 +38,7 @@ public class Author {
 			CascadeType.DETACH, CascadeType.REFRESH})
 	// the key that points back to the author's publisher
 	@JoinColumn(name="publisher_id")
+	@JsonBackReference
 	private Publisher publisher;
 	
 	@OneToMany(mappedBy="author", 
@@ -52,9 +49,9 @@ public class Author {
 		// no-arg constructor
 	}
 
-	public Author(String firstName, String lasstName, String email) {
+	public Author(String firstName, String lastName, String email) {
 		this.firstName = firstName;
-		this.lasstName = lasstName;
+		this.lastName = lastName;
 		this.email = email;
 	}
 
@@ -74,12 +71,12 @@ public class Author {
 		this.firstName = firstName;
 	}
 
-	public String getLasstName() {
-		return lasstName;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setLasstName(String lasstName) {
-		this.lasstName = lasstName;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getEmail() {
@@ -117,7 +114,7 @@ public class Author {
 
 	@Override
 	public String toString() {
-		return "Author [id=" + id + ", firstName=" + firstName + ", lasstName=" + lasstName + ", email=" + email
+		return "Author [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email
 				+ ", publisher=" + publisher + ", asins=" + asins + "]";
 	}
 	

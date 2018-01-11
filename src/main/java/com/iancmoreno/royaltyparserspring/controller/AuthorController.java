@@ -1,5 +1,6 @@
 package com.iancmoreno.royaltyparserspring.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iancmoreno.royaltyparserspring.model.Author;
 import com.iancmoreno.royaltyparserspring.model.Publisher;
-import com.iancmoreno.royaltyparserspring.respository.AsinRepository;
 import com.iancmoreno.royaltyparserspring.respository.AuthorRepository;
 import com.iancmoreno.royaltyparserspring.respository.PublisherRepository;
 
@@ -24,20 +24,28 @@ import com.iancmoreno.royaltyparserspring.respository.PublisherRepository;
 public class AuthorController {
 
 	@Autowired
+	AuthorRepository authorRepository;
+	@Autowired
 	PublisherRepository publisherRepository;
 	
-	// Get ALL Publishers
-	// NOTE: @GetMapping("/publishers") is short form of @RequestMapping(value="/notes", method=RequestMethod.GET)
-	// url endpoint: /api/publishers
-	@GetMapping("/publishers")
-	public List<Publisher> getAllPublishers() {
-		return publisherRepository.findAll();
+	// Get ALL Authors 
+	// url endpoint: /api/publishers/{publisherId}/authors"
+	@GetMapping("/")
+	public List<Author> getAllAuthors(@PathVariable Integer publisherId) {
+		Publisher thePublisher = publisherRepository.findOne(publisherId);
+
+		return thePublisher.getAuthors();
 	}
 	
-	// Create a new Publisher 
-	@PostMapping("/publishers")
-	public Publisher createPublisher(@RequestBody Publisher publisher) {
-		return publisherRepository.save(publisher);
+	// Create a new Author
+	@PostMapping("/")
+	public Author createAuthor(@PathVariable(value="publisherId") Integer publisherId, 
+							  @RequestBody Author author) {
+		Publisher thePublisher = publisherRepository.findOne(publisherId);
+		thePublisher.addAuthor(author);
+		author.setPublisher(thePublisher);
+
+		return authorRepository.save(author);
 	}
 	
 	// Get a single Publisher
