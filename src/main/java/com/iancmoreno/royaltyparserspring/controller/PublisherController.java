@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iancmoreno.royaltyparserspring.model.Asin;
 import com.iancmoreno.royaltyparserspring.model.Author;
 import com.iancmoreno.royaltyparserspring.model.Publisher;
+import com.iancmoreno.royaltyparserspring.respository.AsinRepository;
 import com.iancmoreno.royaltyparserspring.respository.AuthorRepository;
 import com.iancmoreno.royaltyparserspring.respository.PublisherRepository;
 
@@ -27,6 +29,8 @@ public class PublisherController {
 	PublisherRepository publisherRepository;
 	@Autowired
 	AuthorRepository authorRepository;
+	@Autowired
+	AsinRepository asinRepository;
 	
 	// Get ALL Publishers
 	// NOTE: @GetMapping("/publishers") is short form of @RequestMapping(value="/publishers", method=RequestMethod.GET)
@@ -39,13 +43,17 @@ public class PublisherController {
 	// Create a new Publisher 
 	@PostMapping("/")
 	public Publisher createPublisher(@RequestBody Publisher publisher) {
-		return publisherRepository.save(publisher);
+		Publisher thePublisher = new Publisher();
+		thePublisher.setFirstName(publisher.getFirstName());
+		thePublisher.setLastName(publisher.getLastName());
+		thePublisher.setEmail(publisher.getEmail());
+		return publisherRepository.save(thePublisher);
 	}
 	
 	// Get a single Publisher
 	// url endpoint: /api/publishers/{id}
 	@GetMapping("/{id}")
-	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Integer publisherId) {
+	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
 		if (publisher == null) {
@@ -57,7 +65,7 @@ public class PublisherController {
 	
 	// Update a Publisher
 	@PutMapping("/{id}")
-	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Integer publisherId,
+	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Long publisherId,
 													@RequestBody Publisher publisherDetails) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
@@ -76,7 +84,7 @@ public class PublisherController {
 	
 	// Delete a Publisher
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Integer publisherId) {
+	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
 		if (publisher == null) {
@@ -90,7 +98,7 @@ public class PublisherController {
 
 	// Get ALL Authors
 	@GetMapping("/{id}/authors")
-	public ResponseEntity<List<Author>> getAllAuthors(@PathVariable(value="id") Integer publisherId) {
+	public ResponseEntity<List<Author>> getAllAuthors(@PathVariable(value="id") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
 		if (publisher == null) {
@@ -102,11 +110,26 @@ public class PublisherController {
 	
 	// Create new Author
 	@PostMapping("/{id}/authors")
-	public ResponseEntity<?> createAuthor(@PathVariable(value="id") Integer publisherId,
+	public ResponseEntity<?> createAuthor(@PathVariable(value="id") Long publisherId,
 										 @RequestBody Author author) {
 		author.setPublisher(publisherRepository.findOne(publisherId));
 
 		return new ResponseEntity<>(authorRepository.save(author), HttpStatus.CREATED);
 	}
+	
+	// Get single Author
+	@GetMapping("/{id}/authors/{authorId}")
+	public ResponseEntity<Author> getAuthorById(@PathVariable(value="authorId") Long authorId) {
+		Author theAuthor = authorRepository.findOne(authorId);
+		return ResponseEntity.ok(theAuthor);
+	}
 
+	// Create new asins
+	@PostMapping("/{id}/authors/{authorId}/asin")
+	public ResponseEntity<?> createAuthor(@PathVariable(value="authorId") Long authorId,
+			 @RequestBody Asin asin) {
+		asin.setAuthor(authorRepository.findOne(authorId));
+
+		return new ResponseEntity<>(asinRepository.save(asin), HttpStatus.CREATED);
+	}
 }

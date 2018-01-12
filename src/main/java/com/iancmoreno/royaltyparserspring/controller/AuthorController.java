@@ -31,7 +31,7 @@ public class AuthorController {
 	// Get ALL Authors 
 	// url endpoint: /api/publishers/{publisherId}/authors"
 	@GetMapping("/")
-	public List<Author> getAllAuthors(@PathVariable Integer publisherId) {
+	public List<Author> getAllAuthors(@PathVariable Long publisherId) {
 		Publisher thePublisher = publisherRepository.findOne(publisherId);
 
 		return thePublisher.getAuthors();
@@ -39,7 +39,7 @@ public class AuthorController {
 	
 	// Create a new Author
 	@PostMapping("/")
-	public Author createAuthor(@PathVariable(value="publisherId") Integer publisherId, 
+	public Author createAuthor(@PathVariable(value="publisherId") Long publisherId, 
 							  @RequestBody Author author) {
 		Publisher thePublisher = publisherRepository.findOne(publisherId);
 		thePublisher.addAuthor(author);
@@ -51,7 +51,7 @@ public class AuthorController {
 	// Get a single Publisher
 	// url endpoint: /api/publishers/{id}
 	@GetMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Integer publisherId) {
+	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
 		if (publisher == null) {
@@ -63,7 +63,7 @@ public class AuthorController {
 	
 	// Update a Publisher
 	@PutMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Integer publisherId,
+	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Long publisherId,
 													@RequestBody Publisher publisherDetails) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
@@ -82,7 +82,7 @@ public class AuthorController {
 	
 	// Delete a Publisher
 	@DeleteMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Integer publisherId) {
+	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
 		if (publisher == null) {

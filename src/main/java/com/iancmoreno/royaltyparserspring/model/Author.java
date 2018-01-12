@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -23,26 +25,30 @@ public class Author {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+	@Column(name="author_id")
+	private Long id;
 	
+	@NotNull
 	@Column(name="first_name")
 	private String firstName;
 	
+	@NotNull
 	@Column(name="last_name")
 	private String lastName;
 
+	@NotNull
 	@Column(name="email")
 	private String email;
 	
-	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE,
-			CascadeType.DETACH, CascadeType.REFRESH})
+	@ManyToOne(fetch = FetchType.LAZY)
 	// the key that points back to the author's publisher
-	@JoinColumn(name="publisher_id")
+	@JoinColumn(name="publisher_id", nullable = false)
 	@JsonBackReference
 	private Publisher publisher;
 	
 	@OneToMany(mappedBy="author", 
-			cascade={CascadeType.ALL})
+			cascade=CascadeType.ALL,
+			fetch = FetchType.LAZY)
 	private List<Asin> asins;
 
 	public Author() {
@@ -55,11 +61,11 @@ public class Author {
 		this.email = email;
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -96,6 +102,7 @@ public class Author {
 	}
 	
 	public List<Asin> getAsins() {
+		if (asins == null) asins = new ArrayList<>();
 		return asins;
 	}
 
@@ -107,9 +114,11 @@ public class Author {
 		if (asins == null) {
 			asins = new ArrayList<>();
 		}
-		
-		asins.add(theAsin);
+
 		theAsin.setAuthor(this);
+		
+		// persist to db
+		asins.add(theAsin);
 	}
 
 	@Override

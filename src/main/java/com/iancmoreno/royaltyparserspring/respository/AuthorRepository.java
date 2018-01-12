@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.iancmoreno.royaltyparserspring.model.Author;
 
 @Repository
-public interface AuthorRepository extends JpaRepository<Author, Integer> {
+public interface AuthorRepository extends JpaRepository<Author, Long> {
 	// enables Spring to create JpaRepository CRUD methods during component scan
 }

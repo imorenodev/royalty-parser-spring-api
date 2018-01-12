@@ -43,7 +43,7 @@ public class AsinController {
 	// Get a single Publisher
 	// url endpoint: /api/publishers/{id}
 	@GetMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Integer publisherId) {
+	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
 		if (publisher == null) {
@@ -55,7 +55,7 @@ public class AsinController {
 	
 	// Update a Publisher
 	@PutMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Integer publisherId,
+	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Long publisherId,
 													@RequestBody Publisher publisherDetails) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
@@ -74,7 +74,7 @@ public class AsinController {
 	
 	// Delete a Publisher
 	@DeleteMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Integer publisherId) {
+	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
 		
 		if (publisher == null) {

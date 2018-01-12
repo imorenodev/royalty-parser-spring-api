@@ -1,8 +1,8 @@
 package com.iancmoreno.royaltyparserspring.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,12 +14,13 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 
 @Entity
-@Table(name = "author")
+@Table(name = "asin")
 public class Asin {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+	@Column(name="asin_id")
+	private Long id;
 	
 	@Column(name="book_title")
 	private String bookTitle;
@@ -27,10 +28,9 @@ public class Asin {
 	@Column(name="book_asin")
 	private String bookAsin;
 
-	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE,
-			CascadeType.DETACH, CascadeType.REFRESH})
-	// the key that points back to the asin's author 
-	@JoinColumn(name="author_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	// the key that points back to the asin's author
+	@JoinColumn(name="author_id", nullable = false)
 	@JsonBackReference
 	private Author author;
 
@@ -44,11 +44,11 @@ public class Asin {
 		this.bookAsin = bookAsin;
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
