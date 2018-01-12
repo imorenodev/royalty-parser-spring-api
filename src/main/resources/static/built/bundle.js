@@ -60,9 +60,17 @@
 	
 	var _client2 = _interopRequireDefault(_client);
 	
-	var _PublisherContainer = __webpack_require__(232);
+	var _follow = __webpack_require__(232);
+	
+	var _follow2 = _interopRequireDefault(_follow);
+	
+	var _PublisherContainer = __webpack_require__(233);
 	
 	var _PublisherContainer2 = _interopRequireDefault(_PublisherContainer);
+	
+	var _CreateDialog = __webpack_require__(235);
+	
+	var _CreateDialog2 = _interopRequireDefault(_CreateDialog);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -72,6 +80,8 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	var root = '/api';
+	
 	var App = function (_React$Component) {
 		_inherits(App, _React$Component);
 	
@@ -80,20 +90,113 @@
 	
 			var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 	
-			_this.state = { publishers: [] };
+			_this.state = { publishers: [], attributes: [], pageSize: 2, links: {} };
+			_this.updatePageSize = _this.updatePageSize.bind(_this);
+			_this.onCreate = _this.onCreate.bind(_this);
+			_this.onDelete = _this.onDelete.bind(_this);
+			_this.onNavigate = _this.onNavigate.bind(_this);
 			return _this;
 		}
 	
 		_createClass(App, [{
 			key: 'componentDidMount',
 			value: function componentDidMount() {
+				this.loadFromServer(this.state.pageSize);
+			}
+		}, {
+			key: 'loadFromServer',
+			value: function loadFromServer(pageSize) {
 				var _this2 = this;
 	
-				(0, _client2.default)({ method: 'GET',
-					path: '/api/publishers' }).done(function (response) {
-					_this2.setState({ publishers: response.entity._embedded.publishers });
+				(0, _follow2.default)(_client2.default, root, [{ rel: 'publishers', params: { size: pageSize } }]).then(function (publisherCollection) {
+					return (0, _client2.default)({
+						method: 'GET',
+						path: publisherCollection.entity._links.profile.href,
+						headers: { 'Accept': 'application/schema+json' }
+					}).then(function (schema) {
+						_this2.schema = schema.entity;
+						return publisherCollection;
+					});
+				}).done(function (publisherCollection) {
+					_this2.setState({
+						publishers: publisherCollection.entity._embedded.publishers,
+						attributes: Object.keys(_this2.schema.properties),
+						pageSize: pageSize,
+						links: publisherCollection.entity._links });
 				});
 			}
+	
+			// tag::create[]
+	
+		}, {
+			key: 'onCreate',
+			value: function onCreate(newPublisher) {
+				var _this3 = this;
+	
+				(0, _follow2.default)(_client2.default, root, ['publishers']).then(function (publisherCollection) {
+					return (0, _client2.default)({
+						method: 'POST',
+						path: publisherCollection.entity._links.self.href,
+						entity: newPublisher,
+						headers: { 'Content-Type': 'application/json' }
+					});
+				}).then(function (response) {
+					return (0, _follow2.default)(_client2.default, root, [{ rel: 'publishers', params: { 'size': _this3.state.pageSize } }]);
+				}).done(function (response) {
+					if (typeof response.entity._links.last != "undefined") {
+						_this3.onNavigate(response.entity._links.last.href);
+					} else {
+						_this3.onNavigate(response.entity._links.self.href);
+					}
+				});
+			}
+			// end::create[]
+	
+			// tag::delete[]
+	
+		}, {
+			key: 'onDelete',
+			value: function onDelete(publisher) {
+				var _this4 = this;
+	
+				(0, _client2.default)({ method: 'DELETE', path: publisher._links.self.href }).done(function (response) {
+					_this4.loadFromServer(_this4.state.pageSize);
+				});
+			}
+			// end::delete[]
+	
+			// tag::navigate[]
+	
+		}, {
+			key: 'onNavigate',
+			value: function onNavigate(navUri) {
+				var _this5 = this;
+	
+				(0, _client2.default)({ method: 'GET', path: navUri }).done(function (publisherCollection) {
+					_this5.setState({
+						publishers: publisherCollection.entity._embedded.publishers,
+						attributes: _this5.state.attributes,
+						pageSize: _this5.state.pageSize,
+						links: publisherCollection.entity._links
+					});
+				});
+			}
+			// end::navigate[]
+	
+			// tag::update-page-size[]
+	
+		}, {
+			key: 'updatePageSize',
+			value: function updatePageSize(pageSize) {
+				if (pageSize !== this.state.pageSize) {
+					this.loadFromServer(pageSize);
+				}
+			}
+			// end::update-page-size[]
+	
+	
+			// end::follow-1[]
+	
 		}, {
 			key: 'render',
 			value: function render() {
@@ -105,7 +208,13 @@
 						null,
 						"Publishers"
 					),
-					_react2.default.createElement(_PublisherContainer2.default, { publishers: this.state.publishers })
+					_react2.default.createElement(_CreateDialog2.default, { attributes: this.state.attributes, onCreate: this.onCreate }),
+					_react2.default.createElement(_PublisherContainer2.default, { publishers: this.state.publishers,
+						links: this.state.links,
+						pageSize: this.state.pageSize,
+						onNavigate: this.onNavigate,
+						onDelete: this.onDelete,
+						updatePageSize: this.updatePageSize })
 				);
 			}
 		}]);
@@ -26948,6 +27057,53 @@
 
 /***/ }),
 /* 232 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	module.exports = function follow(api, rootPath, relArray) {
+		var root = api({
+			method: 'GET',
+			path: rootPath
+		});
+	
+		return relArray.reduce(function (root, arrayItem) {
+			var rel = typeof arrayItem === 'string' ? arrayItem : arrayItem.rel;
+			return traverseNext(root, rel, arrayItem);
+		}, root);
+	
+		function traverseNext(root, rel, arrayItem) {
+			return root.then(function (response) {
+				if (hasEmbeddedRel(response.entity, rel)) {
+					return response.entity._embedded[rel];
+				}
+	
+				if (!response.entity._links) {
+					return [];
+				}
+	
+				if (typeof arrayItem === 'string') {
+					return api({
+						method: 'GET',
+						path: response.entity._links[rel].href
+					});
+				} else {
+					return api({
+						method: 'GET',
+						path: response.entity._links[rel].href,
+						params: arrayItem.params
+					});
+				}
+			});
+		}
+	
+		function hasEmbeddedRel(entity, rel) {
+			return entity._embedded && entity._embedded.hasOwnProperty(rel);
+		}
+	};
+
+/***/ }),
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26962,7 +27118,11 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _Publisher = __webpack_require__(233);
+	var _reactDom = __webpack_require__(37);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _Publisher = __webpack_require__(234);
 	
 	var _Publisher2 = _interopRequireDefault(_Publisher);
 	
@@ -26977,45 +27137,138 @@
 	var PublisherContainer = function (_React$Component) {
 		_inherits(PublisherContainer, _React$Component);
 	
-		function PublisherContainer() {
+		function PublisherContainer(props) {
 			_classCallCheck(this, PublisherContainer);
 	
-			return _possibleConstructorReturn(this, (PublisherContainer.__proto__ || Object.getPrototypeOf(PublisherContainer)).apply(this, arguments));
+			var _this = _possibleConstructorReturn(this, (PublisherContainer.__proto__ || Object.getPrototypeOf(PublisherContainer)).call(this, props));
+	
+			_this.handleNavFirst = _this.handleNavFirst.bind(_this);
+			_this.handleNavPrev = _this.handleNavPrev.bind(_this);
+			_this.handleNavNext = _this.handleNavNext.bind(_this);
+			_this.handleNavLast = _this.handleNavLast.bind(_this);
+			_this.handleInput = _this.handleInput.bind(_this);
+			return _this;
 		}
 	
+		// tag::handle-page-size-updates[]
+	
+	
 		_createClass(PublisherContainer, [{
+			key: 'handleInput',
+			value: function handleInput(e) {
+				e.preventDefault();
+				var pageSize = _reactDom2.default.findDOMNode(this.refs.pageSize).value;
+				if (/^[0-9]+$/.test(pageSize)) {
+					this.props.updatePageSize(pageSize);
+				} else {
+					_reactDom2.default.findDOMNode(this.refs.pageSize).value = pageSize.substring(0, pageSize.length - 1);
+				}
+			}
+			// end::handle-page-size-updates[]
+	
+			// tag::handle-nav[]
+	
+		}, {
+			key: 'handleNavFirst',
+			value: function handleNavFirst(e) {
+				e.preventDefault();
+				this.props.onNavigate(this.props.links.first.href);
+			}
+		}, {
+			key: 'handleNavPrev',
+			value: function handleNavPrev(e) {
+				e.preventDefault();
+				this.props.onNavigate(this.props.links.prev.href);
+			}
+		}, {
+			key: 'handleNavNext',
+			value: function handleNavNext(e) {
+				e.preventDefault();
+				this.props.onNavigate(this.props.links.next.href);
+			}
+		}, {
+			key: 'handleNavLast',
+			value: function handleNavLast(e) {
+				e.preventDefault();
+				this.props.onNavigate(this.props.links.last.href);
+			}
+			// end::handle-nav[]
+	
+		}, {
 			key: 'render',
 			value: function render() {
+				var _this2 = this;
+	
 				var publishers = this.props.publishers.map(function (publisher) {
-					return _react2.default.createElement(_Publisher2.default, { key: publisher._links.self.href, publisherData: publisher });
+					return _react2.default.createElement(_Publisher2.default, { key: publisher._links.self.href, publisher: publisher, onDelete: _this2.props.onDelete });
 				});
 	
+				var navLinks = [];
+				if ("first" in this.props.links) {
+					navLinks.push(_react2.default.createElement(
+						'button',
+						{ key: 'first', onClick: this.handleNavFirst },
+						'<<'
+					));
+				}
+				if ("prev" in this.props.links) {
+					navLinks.push(_react2.default.createElement(
+						'button',
+						{ key: 'prev', onClick: this.handleNavPrev },
+						'<'
+					));
+				}
+				if ("next" in this.props.links) {
+					navLinks.push(_react2.default.createElement(
+						'button',
+						{ key: 'next', onClick: this.handleNavNext },
+						'>'
+					));
+				}
+				if ("last" in this.props.links) {
+					navLinks.push(_react2.default.createElement(
+						'button',
+						{ key: 'last', onClick: this.handleNavLast },
+						'>>'
+					));
+				}
+	
 				return _react2.default.createElement(
-					'table',
+					'div',
 					null,
+					_react2.default.createElement('input', { ref: 'pageSize', defaultValue: this.props.pageSize, onInput: this.handleInput }),
 					_react2.default.createElement(
-						'tbody',
+						'table',
 						null,
 						_react2.default.createElement(
-							'tr',
+							'tbody',
 							null,
 							_react2.default.createElement(
-								'th',
+								'tr',
 								null,
-								'First Name'
+								_react2.default.createElement(
+									'th',
+									null,
+									'First Name'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'Last Name'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'Email'
+								)
 							),
-							_react2.default.createElement(
-								'th',
-								null,
-								'Last Name'
-							),
-							_react2.default.createElement(
-								'th',
-								null,
-								'Email'
-							)
-						),
-						publishers
+							publishers
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						null,
+						navLinks
 					)
 				);
 			}
@@ -27027,7 +27280,7 @@
 	exports.default = PublisherContainer;
 
 /***/ }),
-/* 233 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27053,13 +27306,21 @@
 	var Publisher = function (_React$Component) {
 		_inherits(Publisher, _React$Component);
 	
-		function Publisher() {
+		function Publisher(props) {
 			_classCallCheck(this, Publisher);
 	
-			return _possibleConstructorReturn(this, (Publisher.__proto__ || Object.getPrototypeOf(Publisher)).apply(this, arguments));
+			var _this = _possibleConstructorReturn(this, (Publisher.__proto__ || Object.getPrototypeOf(Publisher)).call(this, props));
+	
+			_this.handleDelete = _this.handleDelete.bind(_this);
+			return _this;
 		}
 	
 		_createClass(Publisher, [{
+			key: 'handleDelete',
+			value: function handleDelete() {
+				this.props.onDelete(this.props.publisher);
+			}
+		}, {
 			key: 'render',
 			value: function render() {
 				return _react2.default.createElement(
@@ -27068,17 +27329,17 @@
 					_react2.default.createElement(
 						'td',
 						null,
-						this.props.publisherData.firstName
+						this.props.publisher.firstName
 					),
 					_react2.default.createElement(
 						'td',
 						null,
-						this.props.publisherData.lastName
+						this.props.publisher.lastName
 					),
 					_react2.default.createElement(
 						'td',
 						null,
-						this.props.publisherData.email
+						this.props.publisher.email
 					)
 				);
 			}
@@ -27088,6 +27349,122 @@
 	}(_react2.default.Component);
 	
 	exports.default = Publisher;
+
+/***/ }),
+/* 235 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(37);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var CreateDialog = function (_React$Component) {
+		_inherits(CreateDialog, _React$Component);
+	
+		function CreateDialog(props) {
+			_classCallCheck(this, CreateDialog);
+	
+			var _this = _possibleConstructorReturn(this, (CreateDialog.__proto__ || Object.getPrototypeOf(CreateDialog)).call(this, props));
+	
+			_this.handleSubmit = _this.handleSubmit.bind(_this);
+			return _this;
+		}
+	
+		_createClass(CreateDialog, [{
+			key: 'handleSubmit',
+			value: function handleSubmit(e) {
+				var _this2 = this;
+	
+				e.preventDefault();
+				var newPublisher = {};
+				this.props.attributes.forEach(function (attribute) {
+					newPublisher[attribute] = _reactDom2.default.findDOMNode(_this2.refs[attribute]).value.trim();
+				});
+				this.props.onCreate(newPublisher);
+	
+				// clear out the dialog's inputs
+				this.props.attributes.forEach(function (attribute) {
+					_reactDom2.default.findDOMNode(_this2.refs[attribute]).value = '';
+				});
+	
+				// Navigate away from the dialog to hide it.
+				window.location = "#";
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var inputs = this.props.attributes.map(function (attribute) {
+					return _react2.default.createElement(
+						'p',
+						{ key: attribute },
+						_react2.default.createElement('input', { type: 'text', placeholder: attribute, ref: attribute, className: 'field' })
+					);
+				});
+	
+				return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(
+						'a',
+						{ href: '#createPublisher' },
+						'Create'
+					),
+					_react2.default.createElement(
+						'div',
+						{ id: 'createPublisher', className: 'modalDialog' },
+						_react2.default.createElement(
+							'div',
+							null,
+							_react2.default.createElement(
+								'a',
+								{ href: '#', title: 'Close', className: 'close' },
+								'X'
+							),
+							_react2.default.createElement(
+								'h2',
+								null,
+								'Create new publisher'
+							),
+							_react2.default.createElement(
+								'form',
+								null,
+								inputs,
+								_react2.default.createElement(
+									'button',
+									{ onClick: this.handleSubmit },
+									'Create'
+								)
+							)
+						)
+					)
+				);
+			}
+		}]);
+	
+		return CreateDialog;
+	}(_react2.default.Component);
+	
+	exports.default = CreateDialog;
 
 /***/ })
 /******/ ]);
