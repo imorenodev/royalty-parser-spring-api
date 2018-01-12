@@ -1,7 +1,7 @@
 import React from 'react';
-import Publisher from './Publisher.js';
+import Publisher from '../components/Publisher.js';
 
-export default class PublisherList extends React.Component {
+export default class PublisherContainer extends React.Component {
 	render() {
 		var publishers = this.props.publishers.map(publisher =>
 			<Publisher key={ publisher._links.self.href } publisherData={ publisher } />
@@ -21,5 +21,3 @@ export default class PublisherList extends React.Component {
 				)
 	}
 }
-
-//module.exports = PublisherList;

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import client from './client';
-import PublisherList from './components/PublisherList.js';
+import PublisherContainer from './containers/PublisherContainer.js';
 
 class App extends React.Component {
 	constructor(props) {
@@ -21,7 +21,7 @@ class App extends React.Component {
 		return (
 				<div>
 					<h2>{"Publishers"}</h2>
-					<PublisherList publishers={ this.state.publishers }/>
+					<PublisherContainer publishers={ this.state.publishers }/>
 				</div>
 				)
 	}

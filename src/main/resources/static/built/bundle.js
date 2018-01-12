@@ -60,9 +60,9 @@
 	
 	var _client2 = _interopRequireDefault(_client);
 	
-	var _PublisherList = __webpack_require__(232);
+	var _PublisherContainer = __webpack_require__(232);
 	
-	var _PublisherList2 = _interopRequireDefault(_PublisherList);
+	var _PublisherContainer2 = _interopRequireDefault(_PublisherContainer);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -105,7 +105,7 @@
 						null,
 						"Publishers"
 					),
-					_react2.default.createElement(_PublisherList2.default, { publishers: this.state.publishers })
+					_react2.default.createElement(_PublisherContainer2.default, { publishers: this.state.publishers })
 				);
 			}
 		}]);
@@ -26974,16 +26974,16 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var PublisherList = function (_React$Component) {
-		_inherits(PublisherList, _React$Component);
+	var PublisherContainer = function (_React$Component) {
+		_inherits(PublisherContainer, _React$Component);
 	
-		function PublisherList() {
-			_classCallCheck(this, PublisherList);
+		function PublisherContainer() {
+			_classCallCheck(this, PublisherContainer);
 	
-			return _possibleConstructorReturn(this, (PublisherList.__proto__ || Object.getPrototypeOf(PublisherList)).apply(this, arguments));
+			return _possibleConstructorReturn(this, (PublisherContainer.__proto__ || Object.getPrototypeOf(PublisherContainer)).apply(this, arguments));
 		}
 	
-		_createClass(PublisherList, [{
+		_createClass(PublisherContainer, [{
 			key: 'render',
 			value: function render() {
 				var publishers = this.props.publishers.map(function (publisher) {
@@ -27021,13 +27021,10 @@
 			}
 		}]);
 	
-		return PublisherList;
+		return PublisherContainer;
 	}(_react2.default.Component);
 	
-	//module.exports = PublisherList;
-	
-	
-	exports.default = PublisherList;
+	exports.default = PublisherContainer;
 
 /***/ }),
 /* 233 */
