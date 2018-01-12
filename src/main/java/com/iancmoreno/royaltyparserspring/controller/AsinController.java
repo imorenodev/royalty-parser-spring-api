@@ -15,85 +15,89 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iancmoreno.royaltyparserspring.model.Asin;
-import com.iancmoreno.royaltyparserspring.model.Publisher;
+import com.iancmoreno.royaltyparserspring.model.Author;
 import com.iancmoreno.royaltyparserspring.respository.AsinRepository;
 import com.iancmoreno.royaltyparserspring.respository.AuthorRepository;
-import com.iancmoreno.royaltyparserspring.respository.PublisherRepository;
 
 @RestController
-@RequestMapping("/api/publishers/{publisherId}/authors/{authorId}")
+@RequestMapping("/api/publishers/{publisherId}/authors/{authorId}/asins")
 public class AsinController {
 
-	@Autowired
-	PublisherRepository publisherRepository;
 	@Autowired
 	AuthorRepository authorRepository;
 	@Autowired
 	AsinRepository asinRepository;
 
 	
-	// Get ALL Publishers
-	// NOTE: @GetMapping("/publishers") is short form of @RequestMapping(value="/notes", method=RequestMethod.GET)
-	// url endpoint: /api/publishers
-	@GetMapping("/publishers")
-	public List<Publisher> getAllPublishers() {
-		return publisherRepository.findAll();
+	// Get ALL Asin belonging to authorId
+	// url endpoint: /api/publishers/{publisherId}/authors/{authorId}/
+	@GetMapping("/")
+	public ResponseEntity<List<Asin>> getAllAsins(@PathVariable(value="authorId") Long authorId) {
+
+		Author theAuthor = authorRepository.findOne(authorId);
+		
+		if (theAuthor == null) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+
+		return ResponseEntity.ok(theAuthor.getAsins());
 	}
 	
-	// Create new asins
-	@PostMapping("/{id}/authors/{authorId}/asin")
+	// Create new Asin
+	@PostMapping("/")
 	public ResponseEntity<?> createAuthor(@PathVariable(value="authorId") Long authorId,
-			 @RequestBody Asin asin) {
-		asin.setAuthor(authorRepository.findOne(authorId));
-
-		return new ResponseEntity<>(asinRepository.save(asin), HttpStatus.CREATED);
-	}
-	
-	// Get a single Publisher
-	// url endpoint: /api/publishers/{id}
-	@GetMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Long publisherId) {
-		Publisher publisher = publisherRepository.findOne(publisherId);
-		
-		if (publisher == null) {
+										 @RequestBody Asin theAsin) {
+		if (theAsin == null) {
 			return ResponseEntity.notFound().build();
 		}
 
-		return ResponseEntity.ok().body(publisher);
+		theAsin.setAuthor(authorRepository.findOne(authorId));
+
+		return new ResponseEntity<>(asinRepository.save(theAsin), HttpStatus.CREATED);
 	}
 	
-	// Update a Publisher
-	@PutMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Long publisherId,
-													@RequestBody Publisher publisherDetails) {
-		Publisher publisher = publisherRepository.findOne(publisherId);
+	// Get single Asin 
+	@GetMapping("/{asinId}")
+	public ResponseEntity<Asin> getAsinById(@PathVariable(value="asinId") Long asinId) {
+
+		Asin theAsin= asinRepository.findOne(asinId);
+
+		return ResponseEntity.ok(theAsin);
+	}
+	
+	// Update an Asin 
+	@PutMapping("/{asinId}")
+	public ResponseEntity<Asin> updateAsin(@PathVariable(value="asinId") Long asinId,
+													@RequestBody Asin asinDetails) {
 		
-		if (publisher == null) {
+		Asin theAsin = asinRepository.findOne(asinId);
+		
+		if (theAsin == null) {
 			return ResponseEntity.notFound().build();
 		}
 		
-		publisher.setFirstName(publisherDetails.getFirstName());
-		publisher.setLastName(publisherDetails.getLastName());
-		publisher.setEmail(publisherDetails.getEmail());
+		theAsin.setBookTitle(asinDetails.getBookTitle());
+		theAsin.setBookAsin(asinDetails.getBookAsin());
 		
-		Publisher updatedPublisher = publisherRepository.save(publisher);
+		// update author in db
+		Asin updatedAsin = asinRepository.save(theAsin);
 
-		return ResponseEntity.ok(updatedPublisher);
+		return ResponseEntity.ok(updatedAsin);
 	}
 	
-	// Delete a Publisher
-	@DeleteMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Long publisherId) {
-		Publisher publisher = publisherRepository.findOne(publisherId);
+	// Delete an Asin
+	@DeleteMapping("/{asinId}")
+	public ResponseEntity<Asin> deleteAsin(@PathVariable(value="asinId") Long asinId) {
+		Asin theAsin = asinRepository.findOne(asinId);
 		
-		if (publisher == null) {
+		if (theAsin == null) {
 			return ResponseEntity.notFound().build();
 		}
 
-		publisherRepository.delete(publisher);
+		// delete the asin from db
+		asinRepository.delete(theAsin);
 
 		return ResponseEntity.ok().build();
 	}
-
 
 }

@@ -34,7 +34,7 @@ public class PublisherController {
 	
 	// Get ALL Publishers
 	// NOTE: @GetMapping("/publishers") is short form of @RequestMapping(value="/publishers", method=RequestMethod.GET)
-	// url endpoint: /api/publishers
+	// url endpoint: /api/publishers/
 	@GetMapping("/")
 	public List<Publisher> getAllPublishers() {
 		return publisherRepository.findAll();
@@ -96,42 +96,4 @@ public class PublisherController {
 		return ResponseEntity.ok().build();
 	}
 
-/**
-	// Get ALL Authors
-	@GetMapping("/{id}/authors")
-	public ResponseEntity<List<Author>> getAllAuthors(@PathVariable(value="id") Long publisherId) {
-		Publisher publisher = publisherRepository.findOne(publisherId);
-		
-		if (publisher == null) {
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-		}
-
-		return ResponseEntity.ok(publisher.getAuthors());
-	}
-	
-	// Create new Author
-	@PostMapping("/{id}/authors")
-	public ResponseEntity<?> createAuthor(@PathVariable(value="id") Long publisherId,
-										 @RequestBody Author author) {
-		author.setPublisher(publisherRepository.findOne(publisherId));
-
-		return new ResponseEntity<>(authorRepository.save(author), HttpStatus.CREATED);
-	}
-	
-	// Get single Author
-	@GetMapping("/{id}/authors/{authorId}")
-	public ResponseEntity<Author> getAuthorById(@PathVariable(value="authorId") Long authorId) {
-		Author theAuthor = authorRepository.findOne(authorId);
-		return ResponseEntity.ok(theAuthor);
-	}
-
-	// Create new asins
-	@PostMapping("/{id}/authors/{authorId}/asin")
-	public ResponseEntity<?> createAuthor(@PathVariable(value="authorId") Long authorId,
-			 @RequestBody Asin asin) {
-		asin.setAuthor(authorRepository.findOne(authorId));
-
-		return new ResponseEntity<>(asinRepository.save(asin), HttpStatus.CREATED);
-	}
-*/
 }

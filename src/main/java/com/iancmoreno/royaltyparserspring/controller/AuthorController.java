@@ -28,7 +28,7 @@ public class AuthorController {
 	@Autowired
 	PublisherRepository publisherRepository;
 	
-	// Get ALL Authors
+	// Get ALL Authors belonging to publisherId
 	@GetMapping("/")
 	public ResponseEntity<List<Author>> getAllAuthors(@PathVariable(value="publisherId") Long publisherId) {
 		Publisher publisher = publisherRepository.findOne(publisherId);
@@ -52,7 +52,9 @@ public class AuthorController {
 	// Get single Author
 	@GetMapping("/{authorId}")
 	public ResponseEntity<Author> getAuthorById(@PathVariable(value="authorId") Long authorId) {
+
 		Author theAuthor = authorRepository.findOne(authorId);
+
 		return ResponseEntity.ok(theAuthor);
 	}
 	
@@ -70,14 +72,16 @@ public class AuthorController {
 		theAuthor.setLastName(authorDetails.getLastName());
 		theAuthor.setEmail(authorDetails.getEmail());
 		
+		// update author in db
 		Author updatedAuthor = authorRepository.save(theAuthor);
 
 		return ResponseEntity.ok(updatedAuthor);
 	}
 	
 	// Delete an Author 
-	@DeleteMapping("{authorId}")
+	@DeleteMapping("/{authorId}")
 	public ResponseEntity<Author> deleteAuthor(@PathVariable(value="authorId") Long authorId) {
+		
 		Author theAuthor = authorRepository.findOne(authorId);
 		
 		if (theAuthor == null) {
