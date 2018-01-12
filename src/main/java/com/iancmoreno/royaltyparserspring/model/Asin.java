@@ -39,7 +39,6 @@ public class Asin {
 	}
 
 	public Asin(String bookTitle, String bookAsin) {
-		super();
 		this.bookTitle = bookTitle;
 		this.bookAsin = bookAsin;
 	}

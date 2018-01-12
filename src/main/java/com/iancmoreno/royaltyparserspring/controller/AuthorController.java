@@ -1,9 +1,9 @@
 package com.iancmoreno.royaltyparserspring.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,68 +28,64 @@ public class AuthorController {
 	@Autowired
 	PublisherRepository publisherRepository;
 	
-	// Get ALL Authors 
-	// url endpoint: /api/publishers/{publisherId}/authors"
+	// Get ALL Authors
 	@GetMapping("/")
-	public List<Author> getAllAuthors(@PathVariable Long publisherId) {
-		Publisher thePublisher = publisherRepository.findOne(publisherId);
+	public ResponseEntity<List<Author>> getAllAuthors(@PathVariable(value="publisherId") Long publisherId) {
+		Publisher publisher = publisherRepository.findOne(publisherId);
+		
+		if (publisher == null) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
 
-		return thePublisher.getAuthors();
+		return ResponseEntity.ok(publisher.getAuthors());
 	}
 	
-	// Create a new Author
+	// Create new Author
 	@PostMapping("/")
-	public Author createAuthor(@PathVariable(value="publisherId") Long publisherId, 
-							  @RequestBody Author author) {
-		Publisher thePublisher = publisherRepository.findOne(publisherId);
-		thePublisher.addAuthor(author);
-		author.setPublisher(thePublisher);
+	public ResponseEntity<?> createAuthor(@PathVariable(value="publisherId") Long publisherId,
+										 @RequestBody Author author) {
+		author.setPublisher(publisherRepository.findOne(publisherId));
 
-		return authorRepository.save(author);
+		return new ResponseEntity<>(authorRepository.save(author), HttpStatus.CREATED);
 	}
 	
-	// Get a single Publisher
-	// url endpoint: /api/publishers/{id}
-	@GetMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> getPublisherById(@PathVariable(value="id") Long publisherId) {
-		Publisher publisher = publisherRepository.findOne(publisherId);
-		
-		if (publisher == null) {
-			return ResponseEntity.notFound().build();
-		}
-
-		return ResponseEntity.ok().body(publisher);
+	// Get single Author
+	@GetMapping("/{authorId}")
+	public ResponseEntity<Author> getAuthorById(@PathVariable(value="authorId") Long authorId) {
+		Author theAuthor = authorRepository.findOne(authorId);
+		return ResponseEntity.ok(theAuthor);
 	}
 	
-	// Update a Publisher
-	@PutMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> updatePublisher(@PathVariable(value="id") Long publisherId,
-													@RequestBody Publisher publisherDetails) {
-		Publisher publisher = publisherRepository.findOne(publisherId);
+	// Update an Author
+	@PutMapping("/{authorId}")
+	public ResponseEntity<Author> updateAuthor(@PathVariable(value="authorId") Long authorId,
+													@RequestBody Author authorDetails) {
+		Author theAuthor = authorRepository.findOne(authorId);
 		
-		if (publisher == null) {
+		if (theAuthor == null) {
 			return ResponseEntity.notFound().build();
 		}
 		
-		publisher.setFirstName(publisherDetails.getFirstName());
-		publisher.setLastName(publisherDetails.getLastName());
-		publisher.setEmail(publisherDetails.getEmail());
+		theAuthor.setFirstName(authorDetails.getFirstName());
+		theAuthor.setLastName(authorDetails.getLastName());
+		theAuthor.setEmail(authorDetails.getEmail());
 		
-		Publisher updatedPublisher = publisherRepository.save(publisher);
+		Author updatedAuthor = authorRepository.save(theAuthor);
 
-		return ResponseEntity.ok(updatedPublisher);
+		return ResponseEntity.ok(updatedAuthor);
 	}
 	
-	// Delete a Publisher
-	@DeleteMapping("/publishers/{id}")
-	public ResponseEntity<Publisher> deletePublisher(@PathVariable(value="id") Long publisherId) {
-		Publisher publisher = publisherRepository.findOne(publisherId);
+	// Delete an Author 
+	@DeleteMapping("{authorId}")
+	public ResponseEntity<Author> deleteAuthor(@PathVariable(value="authorId") Long authorId) {
+		Author theAuthor = authorRepository.findOne(authorId);
 		
-		if (publisher == null) {
+		if (theAuthor == null) {
 			return ResponseEntity.notFound().build();
 		}
 
-		publisherRepository.delete(publisher);
+		// delete the author from db
+		authorRepository.delete(theAuthor);
 
 		return ResponseEntity.ok().build();
 	}

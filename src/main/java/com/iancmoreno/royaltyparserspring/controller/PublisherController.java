@@ -96,6 +96,7 @@ public class PublisherController {
 		return ResponseEntity.ok().build();
 	}
 
+/**
 	// Get ALL Authors
 	@GetMapping("/{id}/authors")
 	public ResponseEntity<List<Author>> getAllAuthors(@PathVariable(value="id") Long publisherId) {
@@ -132,4 +133,5 @@ public class PublisherController {
 
 		return new ResponseEntity<>(asinRepository.save(asin), HttpStatus.CREATED);
 	}
+*/
 }
