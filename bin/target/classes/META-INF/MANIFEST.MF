@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Title: royalty-parser-spring
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: ianmoreno
+Implementation-Vendor-Id: com.iancmoreno
+Build-Jdk: 1.8.0_141
+Implementation-URL: http://projects.spring.io/spring-boot/royalty-pars
+ er-spring/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+
