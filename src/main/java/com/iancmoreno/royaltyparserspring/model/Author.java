@@ -49,7 +49,7 @@ public class Author {
 	@OneToMany(mappedBy="author", 
 			cascade=CascadeType.ALL,
 			fetch = FetchType.LAZY)
-	private List<Asin> asins;
+	private List<Book> books;
 
 	public Author() {
 		// no-arg constructor
@@ -101,30 +101,30 @@ public class Author {
 		this.publisher = publisher;
 	}
 	
-	public List<Asin> getAsins() {
-		if (asins == null) asins = new ArrayList<>();
-		return asins;
+	public List<Book> getBooks() {
+		if (books == null) books = new ArrayList<>();
+		return books;
 	}
 
-	public void setAsins(List<Asin> asins) {
-		this.asins = asins;
+	public void setAsins(List<Book> books) {
+		this.books = books;
 	}
 
-	public void addAsin(Asin theAsin) {
-		if (asins == null) {
-			asins = new ArrayList<>();
+	public void addBook(Book theBook) {
+		if (books == null) {
+			books = new ArrayList<>();
 		}
 
-		theAsin.setAuthor(this);
+		theBook.setAuthor(this);
 		
 		// persist to db
-		asins.add(theAsin);
+		books.add(theBook);
 	}
 
 	@Override
 	public String toString() {
 		return "Author [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email
-				+ ", publisher=" + publisher + ", asins=" + asins + "]";
+				+ ", publisher=" + publisher + ", books=" + books + "]";
 	}
 	
 }

@@ -14,12 +14,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 
 @Entity
-@Table(name = "asin")
-public class Asin {
+@Table(name = "book")
+public class Book {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name="asin_id")
+	@Column(name="book_id")
 	private Long id;
 	
 	@Column(name="book_title")
@@ -34,11 +34,11 @@ public class Asin {
 	@JsonBackReference
 	private Author author;
 
-	public Asin() {
+	public Book() {
 		// no-arg constructor
 	}
 
-	public Asin(String bookTitle, String bookAsin) {
+	public Book(String bookTitle, String bookAsin) {
 		this.bookTitle = bookTitle;
 		this.bookAsin = bookAsin;
 	}
@@ -77,6 +77,6 @@ public class Asin {
 
 	@Override
 	public String toString() {
-		return "Asin [id=" + id + ", bookTitle=" + bookTitle + ", bookAsin=" + bookAsin + ", author=" + author + "]";
+		return "Book [id=" + id + ", bookTitle=" + bookTitle + ", bookAsin=" + bookAsin + ", author=" + author + "]";
 	}
 }

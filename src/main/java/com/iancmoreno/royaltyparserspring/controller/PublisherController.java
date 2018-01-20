@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iancmoreno.royaltyparserspring.model.Publisher;
-import com.iancmoreno.royaltyparserspring.respository.AsinRepository;
+import com.iancmoreno.royaltyparserspring.respository.BookRepository;
 import com.iancmoreno.royaltyparserspring.respository.AuthorRepository;
 import com.iancmoreno.royaltyparserspring.respository.PublisherRepository;
 
@@ -27,7 +27,7 @@ public class PublisherController {
 	@Autowired
 	AuthorRepository authorRepository;
 	@Autowired
-	AsinRepository asinRepository;
+	BookRepository bookRepository;
 	
 	// Get ALL Publishers
 	// NOTE: @GetMapping("/publishers") is short form of @RequestMapping(value="/publishers", method=RequestMethod.GET)
