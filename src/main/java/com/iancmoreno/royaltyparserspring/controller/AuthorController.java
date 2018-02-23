@@ -43,7 +43,6 @@ public class AuthorController {
 	
 	// Create new Author
 	// Allow CORS for post request
-	@CrossOrigin
 	@PostMapping("/")
 	public ResponseEntity<?> createAuthor(@PathVariable(value="publisherId") Long publisherId,
 										 @RequestBody Author author) {
@@ -82,7 +81,6 @@ public class AuthorController {
 	}
 	
 	// Delete an Author 
-	@CrossOrigin
 	@DeleteMapping("/{authorId}")
 	public ResponseEntity<Author> deleteAuthor(@PathVariable(value="authorId") Long authorId) {
 		
